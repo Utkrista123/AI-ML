@@ -10,7 +10,7 @@ client = Groq(
 
 response = client.chat.completions.create(
     model= "llama-3.3-70b-versatile",
-    temperature=1.0,
+    temperature=0.1,
     messages=[
         {
             "role": "system",
@@ -18,7 +18,7 @@ response = client.chat.completions.create(
         },
         {
             "role": "user",
-            "content": "tell me a joke."
+            "content": "what is the marriage for boy in nepal?"
         }
     ]
 )

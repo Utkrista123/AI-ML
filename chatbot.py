@@ -18,6 +18,15 @@ messages = [
 while True:
     user_input = input("You: ")
 
+    if user_input.lower() == "clear":
+        del messages[1:]
+
+    if user_input.lower() == "history":
+        print(messages)
+
+    if user_input.lower() == "help":
+        print("Type 'clear' to clears conversation history. \n Type 'history' to prints all messages.")
+
     messages.append(
         {
             "role":"system",

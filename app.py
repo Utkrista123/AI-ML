@@ -40,8 +40,8 @@ if "messages" not in st.session_state:
 for message in st.session_state.messages:
 	if message["role"] == "system":
 		continue
-	with st.chat_message(message("role")):
-		st.write(message("content"))
+	with st.chat_message(message["role"]):
+		st.write(message["content"])
 
 user_input = st.chat_input("Type your message...")
 
@@ -72,3 +72,20 @@ if user_input:
 			"content" : assistant_reply
 		}
 	)
+	
+with st.sidebar:
+    st.header("Controls")
+ 
+    # Button to clear the conversation and start fresh
+    if st.button("Clear conversation", use_container_width=True):
+        st.session_state.messages = [
+            {
+                "role" : "system",
+                "content": system_promp	
+            }
+        ]
+        st.rerun()  # reload the page so the chat clears
+ 
+    st.divider()
+		
+	

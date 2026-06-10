@@ -37,5 +37,4 @@ for i in range(len(sentences)):
         print("-" * 40)
     
 print("The highest score is: ")
-print(f"{sen1 } <--->  {sen2}  :  {highest_score:.4f}")
-
+print(f"{sen1 } <---> {sen2} : {highest_score:.4f}")

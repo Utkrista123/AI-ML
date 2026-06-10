@@ -5,15 +5,18 @@ client = chromadb.PersistentClient(
 )
 
 collection = client.get_collection(
-    name = "facts"
+    name = "law"
 )
 
 results = collection.query(
     query_texts=[
-        "Building web applications with Python"
+        "what rigts do citizens have?"
     ],
-    n_results=3
+    n_results=3,
+    where={
+        "source": "city"
+    }
 )
 
-for doc in results["documents"][0]:
-    print(doc)
+for doc, meta in zip(results["documents"][0], results["metadatas"][0]):
+    print(f"{doc} article_number: {meta ["article_number"]}, language: {meta ["language"]}")

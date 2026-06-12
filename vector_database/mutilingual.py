@@ -5,12 +5,12 @@ from chromadb.api.types import EmbeddingFunction
 model = SentenceTransformer("intfloat/multilingual-e5-base")
 
 class E5EmbeddingFunction(EmbeddingFunction):
-    def __inti__(self, model):
+    def __init__(self, model):
         self.model = model
 
     def __call__(self, input):
         inputs = ["passage: " + text for text in input]
-        return model.encode(inputs).tolist()
+        return self.model.encode(inputs).tolist()
     
     def name(self):
         return "e5-custom"

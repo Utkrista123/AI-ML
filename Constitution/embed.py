@@ -30,3 +30,93 @@ def setup_chromadb(db_path, collection_name):
 
 def embed_and_store(articles, model, collection):
     existing_count = collection.count()
+    if existing_count >= len(articles):
+        print("ChromaDB already exist.")
+        return
+    
+    total_batches = (len(articles) + BATCH_SIZE - 1) // BATCH_SIZE
+
+    for batch_num in range(total_batches):
+        start  = batch_num * BATCH_SIZE
+        end = min(start + BATCH_SIZE, len(articles))
+        batch  = articles[start:end]
+
+        texts_to_embed = [f"passage: {article['article_text']}" for article in batch]
+
+        embeddings = model.encode(
+            texts_to_embed,
+            show_progress_bar = False,
+            normalize_embeddings = True
+        )
+
+        collection.add(
+            documents = [a["article_text"] for a in batch],
+
+            embeddings = embeddings.tolist(),
+
+            metadatas = [
+                {
+                    "article_number": a["article_number"],
+                    "source": a["source"],
+                    "language": a["language"],
+                    "chunk_id": a ["chunk_id"]
+                }
+                for a in batch
+            ],
+
+            ids = [a["chunk_id"] for a in batch]
+        )
+
+        print(f"Batch {batch_num + 1}/{total_batches}-"
+              f"articles {start + 1}-{end} embedded")
+        
+def verify_search(model, collection):
+    print("Running a quick verification query...")
+    print("-" * 45)
+
+    test_question = "What are the fundamental rights of citizens?"
+    print(f"Question: {test_question}\n")
+
+    query_embedding = model.encode(
+        f"query: {test_question}",
+        normalize_embeddings = True
+    )
+
+    results = collection.query(
+        query_embeddings = [query_embedding.tolist()],
+        n_results = 3
+    )
+
+    for i, (doc, meta) in enumerate(zip(
+        results["documents"][0],
+        results["metadatas"][0]
+    )):
+        print(f"Result {i + 1}: Article {meta['article_number']}")
+        print(f"    {doc[:120].replace(chr(10), ' ')}...")
+        print()
+    print("The search is working.")
+
+def main():
+    if not os.path.exists(ARTICLES_PATH):
+        print(f"Error: {ARTICLES_PATH} not found.")
+        sys.exit(1)
+
+    with open(ARTICLES_PATH, "r", encoding="utf-8") as f:
+        aritcles = json.load(f)
+    print(f"Loaded {len(aritcles)} articles.\n")
+
+    model = load_embedding_model(EMBEDDING_MODEL)
+
+    collection = setup_chromadb(CHROMA_DB_PATH, COLLECTION_NAME)
+
+    embed_and_store(aritcles, model, collection)
+
+    verify_search(model, collection)
+
+    print("=" * 55)
+    print(f"  DONE. Database saved to {CHROMA_DB_PATH}/")
+    print(f"  Next step: run streamlit run step3_app.py")
+    print("=" * 55)
+    
+if __name__ == "__main__":
+    main()

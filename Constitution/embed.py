@@ -69,32 +69,6 @@ def embed_and_store(articles, model, collection):
 
         print(f"Batch {batch_num + 1}/{total_batches}-"
               f"articles {start + 1}-{end} embedded")
-        
-def verify_search(model, collection):
-    print("Running a quick verification query...")
-    print("-" * 45)
-
-    test_question = "What are the fundamental rights of citizens?"
-    print(f"Question: {test_question}\n")
-
-    query_embedding = model.encode(
-        f"query: {test_question}",
-        normalize_embeddings = True
-    )
-
-    results = collection.query(
-        query_embeddings = [query_embedding.tolist()],
-        n_results = 3
-    )
-
-    for i, (doc, meta) in enumerate(zip(
-        results["documents"][0],
-        results["metadatas"][0]
-    )):
-        print(f"Result {i + 1}: Article {meta['article_number']}")
-        print(f"    {doc[:120].replace(chr(10), ' ')}...")
-        print()
-    print("The search is working.")
 
 def main():
     if not os.path.exists(ARTICLES_PATH):
@@ -110,8 +84,6 @@ def main():
     collection = setup_chromadb(CHROMA_DB_PATH, COLLECTION_NAME)
 
     embed_and_store(aritcles, model, collection)
-
-    verify_search(model, collection)
 
     print("=" * 55)
     print(f"  DONE. Database saved to {CHROMA_DB_PATH}/")
